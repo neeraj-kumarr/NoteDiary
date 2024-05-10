@@ -22,8 +22,8 @@ const validate = validations => {
 };
 
 
-// // Create a User using: POST "/api/auth/". Doesn't require Auth
-router.post('/', validate([
+// // Create a User using: POST "/api/auth/createuser". Doesn't require Auth
+router.post('/createuser', validate([
     body('name', 'Name length must be atleast 3 characters').isLength({ min: 3 }).withMessage('Name length must be atleast 5 characters'),
     body('password').isLength({ min: 5 }).withMessage('Password length must be atleast 5 characters'),
     body('email').isEmail().withMessage('Not a valid e-mail address'),
@@ -32,13 +32,23 @@ router.post('/', validate([
     try {
         const { name, password, email } = req.body;
 
+        const existingUser = await User.findOne({ email })
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
+
+
         await User.create({ name, password, email });
 
         res.send({ name, email }); // Sending back only necessary information
+
     } catch (error) {
-        console.error('Error creating user:', error);
-        res.json({ error: 'Email already in use', message: error.message });
+        console.error(error.message);
+        res.status(500).send("Internal Server Error")
     }
+
+
+
 
 });
 
