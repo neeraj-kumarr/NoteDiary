@@ -2,7 +2,8 @@ const express = require('express');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
-
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const validate = validations => {
     return async (req, res, next) => {
@@ -11,7 +12,7 @@ const validate = validations => {
             const result = await validation.run(req);
             if (result.errors.length) break;
         }
-
+        // if there are no errors, 'next()' will run or execute the code after all the middleware function is finished
         const errors = validationResult(req);
         if (errors.isEmpty()) {
             return next();
@@ -30,17 +31,30 @@ router.post('/createuser', validate([
 ]), async (req, res) => {
 
     try {
-        const { name, password, email } = req.body;
+        // add salt to password
+        const salt = bcrypt.genSaltSync(10);
+        const password = await bcrypt.hash(req.body.password, salt);
 
+        const { name, email } = req.body;
+
+        // If an email is already registered, return error and stop
         const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.status(400).json({ error: 'Email already in use' });
         }
 
-
+        // create user
         await User.create({ name, password, email });
 
-        res.send({ name, email }); // Sending back only necessary information
+        res.send({ name, email, password }); // Sending back only necessary information
+
+        const data = {
+            user: {
+                id: User.id
+            }
+        }
+        const token = jwt.sign(data, 'shhhhh');
+        console.log(token);
 
     } catch (error) {
         console.error(error.message);
