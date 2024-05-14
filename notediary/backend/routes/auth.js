@@ -3,7 +3,9 @@ const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
+var fetchuser = require('../middleware/fetchuser');
+
 
 const validate = validations => {
     return async (req, res, next) => {
@@ -23,83 +25,83 @@ const validate = validations => {
 };
 
 
-// Create a User using: POST "/api/auth/createuser". Doesn't require Auth
+// Route 1: Create a User
 router.post('/createuser', validate([
-    body('name', 'Name length must be atleast 3 characters').isLength({ min: 3 }).withMessage('Name length must be atleast 5 characters'),
-    body('password').isLength({ min: 5 }).withMessage('Password length must be atleast 5 characters'),
-    body('email').isEmail().withMessage('Not a valid e-mail address'),
+    // Validation middleware
 ]), async (req, res) => {
-
     try {
-        // add salt to password
-        const salt = bcrypt.genSaltSync(10);
-        const password = await bcrypt.hash(req.body.password, salt);
+        // Your user creation logic
 
         const { name, email } = req.body;
+        const existingUser = await User.findOne({ email });
 
-        // If an email is already registered, return error and stop
-        const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.status(400).json({ error: 'Email already in use' });
         }
 
-        // create user
-        await User.create({ name, password, email });
+        // Hash the password
+        const salt = bcrypt.genSaltSync(10);
+        const password = await bcrypt.hash(req.body.password, salt);
 
-        res.send({ name, email, password }); // Sending back only necessary information
+        // Create the user
+        const newUser = await User.create({ name, password, email });
 
-        const data = {
-            user: {
-                id: User.id
-            }
-        }
-        const token = jwt.sign(data, 'shhhhh');
-        console.log(token);
+        // Set the user's ID in the JWT payload
+        const token = jwt.sign({ user: { id: newUser.id } }, 'shhhhh');
+
+        res.json({ authtoken: token });
 
     } catch (error) {
         console.error(error.message);
-        res.status(500).send("Internal Server Error")
+        res.status(500).send('Internal Server Error');
     }
-
 });
 
-// Create a User using: POST "/api/auth/createuser". Doesn't require Auth
+// Route 2: User Login
 router.post('/login', validate([
-    body('email').isEmail().withMessage('Not a valid e-mail address'),
-    body('password').exists().withMessage('Please provide correct login creditionals'),
+    // Validation middleware
 ]), async (req, res) => {
+    try {
+        // Your login logic
+
+        const { email, password } = req.body;
+        const existingUser = await User.findOne({ email });
+
+        if (!existingUser) {
+            return res.status(400).json({ error: 'Please provide correct login credentials' });
+        }
+
+        const passwordCompare = await bcrypt.compare(password, existingUser.password);
+
+        if (!passwordCompare) {
+            return res.status(400).json({ error: 'Please provide correct login credentials' });
+        }
+
+        // Set the user's ID in the JWT payload
+        const token = jwt.sign({ user: { id: existingUser.id } }, 'shhhhh');
+
+        res.json({ authtoken: token });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+// Route 3: Create a User using: POST "/api/auth/getuser". Doesn't require Auth
+router.post('/getuser', fetchuser, async (req, res) => {
 
     try {
-
-        const { password, email } = req.body;
-
-        const existingUser = await User.findOne({ email })
-        if (!existingUser) {
-            return res.status(400).json({ error: 'Please provide correct login creditionals' });
-        }
-
-        const passwordCompare = await bcrypt.compare(password, existingUser.password)
-        if (!passwordCompare) {
-            return res.status(400).json({ error: 'Please provide correct login creditionals' });
-        }
-
-        const data = {
-            user: {
-                id: User.id
-            }
-        }
-
-        const token = jwt.sign(data, 'shhhhh');
-
-        res.send({ authtoken: token }); // Sending back only necessary information
-        console.log(token);
-
+        userId = req.user.id;
+        const user = await User.findById(userId).select("-password")
+        res.send(user);
 
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Internal Server Error")
     }
-
 });
+
 
 module.exports = router;
