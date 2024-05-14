@@ -23,7 +23,7 @@ const validate = validations => {
 };
 
 
-// // Create a User using: POST "/api/auth/createuser". Doesn't require Auth
+// Create a User using: POST "/api/auth/createuser". Doesn't require Auth
 router.post('/createuser', validate([
     body('name', 'Name length must be atleast 3 characters').isLength({ min: 3 }).withMessage('Name length must be atleast 5 characters'),
     body('password').isLength({ min: 5 }).withMessage('Password length must be atleast 5 characters'),
@@ -61,8 +61,44 @@ router.post('/createuser', validate([
         res.status(500).send("Internal Server Error")
     }
 
+});
+
+// Create a User using: POST "/api/auth/createuser". Doesn't require Auth
+router.post('/login', validate([
+    body('email').isEmail().withMessage('Not a valid e-mail address'),
+    body('password').exists().withMessage('Please provide correct login creditionals'),
+]), async (req, res) => {
+
+    try {
+
+        const { password, email } = req.body;
+
+        const existingUser = await User.findOne({ email })
+        if (!existingUser) {
+            return res.status(400).json({ error: 'Please provide correct login creditionals' });
+        }
+
+        const passwordCompare = await bcrypt.compare(password, existingUser.password)
+        if (!passwordCompare) {
+            return res.status(400).json({ error: 'Please provide correct login creditionals' });
+        }
+
+        const data = {
+            user: {
+                id: User.id
+            }
+        }
+
+        const token = jwt.sign(data, 'shhhhh');
+
+        res.send({ authtoken: token }); // Sending back only necessary information
+        console.log(token);
 
 
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error")
+    }
 
 });
 
