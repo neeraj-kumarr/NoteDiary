@@ -54,12 +54,12 @@ router.post('/addnotes', fetchuser,
     });
 
 // ROUTE 3: Update an existing note by note-id using: PUT "/api/notes/updatenotes/:id". Login Required 
-
 router.put('/updatenotes/:id', fetchuser, async (req, res) => {
-    try {
 
-        // Get items from body
-        const { title, description, tag } = req.body;
+    // Get items from body
+    const { title, description, tag } = req.body;
+
+    try {
 
         // Create a newNote Object
         const newNote = {};
@@ -70,7 +70,7 @@ router.put('/updatenotes/:id', fetchuser, async (req, res) => {
 
         // Find the note 
         let notes = await Notes.findById(req.params.id);
-        if (!notes) { return res.status(404).send("Note not available") };
+        if (!notes) { return res.status(404).send("The note doesn't exist") };
 
         // Only allow the logged in user to access their own notes
         if (notes.user.toString() !== req.user.id) { return res.status(401).send("Not Allowed") };
@@ -78,6 +78,28 @@ router.put('/updatenotes/:id', fetchuser, async (req, res) => {
         // Update the note
         notes = await Notes.findByIdAndUpdate(req.params.id, { $set: newNote }, { new: true })
         res.json({ "Notes Updated": { notes } })
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// ROUTE 4: Delete an existing note by note-id using: DELETE "/api/notes/deletenotes/:id". Login Required 
+router.delete('/deletenotes/:id', fetchuser, async (req, res) => {
+
+    try {
+        // Find the note 
+        let notes = await Notes.findById(req.params.id);
+        if (!notes) { return res.status(404).json("The note doesn't exist") };
+
+        // Only allow the logged in user to access their own notes
+        if (notes.user.toString() !== req.user.id) { return res.status(401).send("Not Allowed") };
+
+        // delete the note
+        notes = await Notes.findByIdAndDelete(req.params.id)
+        res.json({ "Your note has been deleted": { notes } })
+
     } catch (error) {
         console.error(error.message);
         res.status(500).send('Internal Server Error');
