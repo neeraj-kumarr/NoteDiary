@@ -7,11 +7,11 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
-// import NoteState from './context/notes/NoteState';
+import NoteState from './context/notes/NoteState';
 
 const App = () => {
   return (
-    // <NoteState>
+    <NoteState>
       <BrowserRouter>
         <Navbar />
         <Routes>
@@ -19,7 +19,7 @@ const App = () => {
           <Route exact path="/about" element={<About />} />
         </Routes>
       </BrowserRouter>
-    // </NoteState>
+     </NoteState>
   );
 }
 

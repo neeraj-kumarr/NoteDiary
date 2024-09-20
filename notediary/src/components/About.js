@@ -1,17 +1,17 @@
-// import React, { useContext, useEffect } from 'react';
-import React from 'react';
-// import NoteContext from '../context/notes/NoteContext';
+import React,{useContext,useEffect} from 'react';
+import NoteContext from '../context/notes/NoteContext';
 
 const About = () => {
-    // const temp = useContext(NoteContext);
+    const temp = useContext(NoteContext);
 
-    // useEffect(() => {
-    //     temp.update();
-    // }, [])
+    useEffect(() => {
+        temp.update()
+    }, [])
+    
     return (
         <div>
-            {/* This is about {temp.state.name} */}
-            This is about 
+            {/* This is about {temp.name} */}
+            This is about {temp.value.name} and he is {temp.value.class}
         </div>
     );
 }
