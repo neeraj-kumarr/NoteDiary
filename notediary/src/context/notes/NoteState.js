@@ -3,24 +3,75 @@ import NoteContext from "./NoteContext";
 
 const NoteState = (props) => {
 
-    const state = {
-        "name": "Neeraj",
-        "class": "Graduate",
-    }
-    const [value, setValue] = useState(state);
-
-
-    const update = () => {
-        setTimeout(() => {
-            setValue({
-                "name": "Sahil",
-                "class": "PostGrad"
-            })
-        }, 2000);
-    }
+    const initialNotes = [
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        },
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        },
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        },
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        },
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        },
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        },
+        {
+            "user": "6708b4cf555396bb36aa37a2",
+            "title": "to do",
+            "description": "Complete today",
+            "tag": "General",
+            "_id": "6708b7ac281cc2afe51737c4",
+            "date": "2024-10-11T05:29:16.244Z",
+            "__v": 0
+        }
+    ]
+    const [notes, setNotes] = useState(initialNotes);
 
     return (
-        <NoteContext.Provider value={{ value, update }}>
+        <NoteContext.Provider value={{ notes, setNotes }}>
             {props.children}
         </NoteContext.Provider>
     )

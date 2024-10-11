@@ -89,7 +89,7 @@ router.post('/login', validate([
 });
 
 
-// Route 3: Create a User using: POST "/api/auth/getuser". Doesn't require Auth
+// Route 3: Get a User  using: POST "/api/auth/getuser". Doesn't require Auth
 router.post('/getuser', fetchuser, async (req, res) => {
 
     try {
